@@ -1,5 +1,5 @@
 # HostelHub — Progress Report
-Last updated: 2026-10-29 01:40 PKT | Current milestone: M3 | Overall: 44% (4/9 milestones)
+Last updated: 2026-10-29 01:43 PKT | Current milestone: M3 | Overall: 44% (4/9 milestones)
 
 ## Milestone status
 | ID | Name | Status (Not started / In progress / Done / Blocked) | Verified how |
@@ -7,7 +7,7 @@ Last updated: 2026-10-29 01:40 PKT | Current milestone: M3 | Overall: 44% (4/9 m
 | M0 | Foundation + GitHub CI/CD | Done | Analyzed, widget test passed, CI workflow added |
 | M1 | Auth + Database & Security | Done | Analyzed, 9 unit tests passed, models & repos built |
 | M2 | Properties & Rooms | Done | Analyzed, 13 unit tests passed, full CRUD & vacancy filtering |
-| M3 | Residents | Done | Analyzed, 20 unit tests passed, validation, masking, room picker |
+| M3 | Residents | Done | Analyzed, 21 unit tests passed, validation, masking, room picker |
 | M4 | Rent & Payments | Not started | — |
 | M5 | Reminders & Receipts | Not started | — |
 | M6 | Monetization | Not started | — |
@@ -35,7 +35,7 @@ Last updated: 2026-10-29 01:40 PKT | Current milestone: M3 | Overall: 44% (4/9 m
 
 ## Verification
 - flutter analyze: 0 issues
-- flutter test: 20 passed / 0 failed
+- flutter test: 21 passed / 0 failed
 - debug APK built: desugaring and all dependencies verified
 - Manual tests performed on device: Verified phone normalization, CNIC 5-second reveal, and room capacity updates
 
