@@ -14,6 +14,7 @@ import '../../data/models/rent_charge.dart';
 import '../../data/models/resident.dart';
 import '../auth/providers/auth_provider.dart';
 import '../billing/widgets/write_lock_guard.dart';
+import '../notifications/notification_service.dart';
 import '../receipts/services/whatsapp_service.dart';
 import 'providers/rent_providers.dart';
 import 'record_payment_sheet.dart';
@@ -55,6 +56,20 @@ class RentScreen extends ConsumerWidget {
     final chargesAsync = ref.watch(filteredChargesProvider);
     final summary = ref.watch(rentMonthSummaryProvider);
     final currentFilter = ref.watch(rentFilterProvider);
+
+    final filterParam = GoRouterState.of(context).uri.queryParameters['filter'];
+    if (filterParam != null && filterParam.isNotEmpty && currentFilter != filterParam.toLowerCase()) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(rentFilterProvider.notifier).setFilter(filterParam);
+      });
+    }
+
+    ref.listen<RentMonthSummary>(rentMonthSummaryProvider, (prev, next) {
+      NotificationService.instance.scheduleDailyDueReminder(
+        dueTodayCount: next.countPending,
+        overdueCount: next.countOverdue,
+      );
+    });
 
     final monthFormat = DateFormat('MMMM yyyy');
     final currencyFormatter = NumberFormat('#,##0');

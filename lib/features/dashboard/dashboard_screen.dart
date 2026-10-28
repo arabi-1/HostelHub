@@ -10,6 +10,7 @@ import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
 import '../billing/widgets/trial_banner.dart';
 import '../billing/widgets/write_lock_guard.dart';
+import '../notifications/notification_service.dart';
 import 'providers/dashboard_provider.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -21,6 +22,11 @@ class DashboardScreen extends ConsumerWidget {
     final recentPaymentsAsync = ref.watch(recentPaymentsProvider);
     final currencyFormat = NumberFormat('#,##0');
     final dateFormat = DateFormat('dd MMM yyyy');
+
+    // In-context permission request for Android 13+ (POST_NOTIFICATIONS)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      NotificationService.instance.requestPermission();
+    });
 
     return Scaffold(
       appBar: AppBar(

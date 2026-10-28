@@ -13,6 +13,7 @@ import '../../core/widgets/loading_view.dart';
 import '../../data/models/profile.dart';
 import '../auth/providers/auth_provider.dart';
 import '../billing/providers/subscription_provider.dart';
+import '../notifications/notification_service.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -109,6 +110,7 @@ class SettingsScreen extends ConsumerWidget {
     );
 
     if (confirmed && context.mounted) {
+      await NotificationService.instance.cancelAllReminders();
       final success = await ref.read(authControllerProvider.notifier).deleteAccount();
       if (!success && context.mounted) {
         final error = ref.read(authControllerProvider).errorMessage ?? 'Account deletion failed';
@@ -132,6 +134,7 @@ class SettingsScreen extends ConsumerWidget {
     );
 
     if (confirmed && context.mounted) {
+      await NotificationService.instance.cancelAllReminders();
       await ref.read(authControllerProvider.notifier).signOut();
     }
   }
