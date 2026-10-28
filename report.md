@@ -1,5 +1,5 @@
 # HostelHub — Progress Report
-Last updated: 2026-10-29 01:50 PKT | Current milestone: M4 | Overall: 56% (5/9 milestones)
+Last updated: 2026-10-29 02:15 PKT | Current milestone: M5 | Overall: 67% (6/9 milestones)
 
 ## Milestone status
 | ID | Name | Status (Not started / In progress / Done / Blocked) | Verified how |
@@ -9,49 +9,52 @@ Last updated: 2026-10-29 01:50 PKT | Current milestone: M4 | Overall: 56% (5/9 m
 | M2 | Properties & Rooms | Done | Analyzed, 13 unit tests passed, full CRUD & vacancy filtering |
 | M3 | Residents | Done | Analyzed, 21 unit tests passed, validation, masking, room picker |
 | M4 | Rent & Payments | Done | Analyzed, 30 unit tests passed, balances, partial payments, ledger |
-| M5 | Reminders & Receipts | Not started | — |
+| M5 | Reminders & Receipts | Done | Analyzed, 38 unit tests passed, WhatsApp templates, PDF receipt generator, zero CNIC leakage verified |
 | M6 | Monetization | Not started | — |
 | M7 | Compliance & Release Build | Not started | — |
 | M8 | Dashboard, Notifications & Polish | Not started | — |
 
 ## Completed in this milestone
-- **FR-12 & UC8 (Monthly Charge Generation):**
-  - Implemented idempotent charge upsert logic on `(resident_id, period)` in `RentRepo.generateMonthlyCharges(month)`.
-  - Automatically queries active residents whose stay spans the selected month and generates exact bills on app/tab open.
-- **FR-13 & FR-14 (Record Full & Partial Payments):**
-  - Built `RecordPaymentSheet` allowing 1-tap full or partial payment entry.
-  - Enforced payment constraints: amount must be > 0 and cannot exceed the current charge balance.
-  - Supported multiple payment methods (`cash`, `bank_transfer`, `easypaisa`, `jazzcash`, `other`) and auto-generated receipt numbers (`RCT-XXXXXX`).
-- **FR-15 (Resident Ledger & Running Balance):**
-  - Built `ResidentLedgerScreen` interleaving rent charges (debits) and recorded payments (credits) chronologically with a live running balance.
-  - Provided at-a-glance summary cards for Total Billed, Total Paid, and Outstanding Balance Due.
-- **FR-16 (24-Hour Payment Edit & Delete Corrections):**
-  - Implemented 24-hour correction window guards in `RentStatusUtils.canEditPayment` and `PaymentRepo`.
-  - Allowed editing amount, method, or note, and safe deletion within 24 hours of creation.
-- **UI & Navigation:**
-  - Built `RentScreen` with interactive month switcher (`< MMMM yyyy >`), summary counters (Overdue, Pending, Partial, Paid), status filter chips, and quick action buttons.
-  - Wired routes `/rent` and `/residents/:id/ledger` in `app_router.dart`.
-- **Testing & Verification:**
-  - Added comprehensive tests in `test/rent_test.dart` for status derivations, period/due-date calculations, 24-hour edit window, and partial payment summing.
+- **FR-17 & FR-18 (Standardized WhatsApp Reminders & Receipts):**
+  - Implemented `WhatsAppService` with standardized reminder (overdue vs pending due dates) and receipt templates per Section 8.1.
+  - Built pure URL builder formatting `https://wa.me/{phone}?text={encoded}` with digits-only normalization (`923XXXXXXXXX`).
+  - Added clipboard fallback with user SnackBar notification if `url_launcher` fails.
+  - Verified CNIC is never included in WhatsApp messages or query parameters.
+- **FR-19 (PDF Receipt Generation & Preview):**
+  - Implemented `PdfReceiptBuilder` creating clean A5 receipts in deep teal brand styling (`pdf` package) with business name, receipt number, breakdown, and payment method.
+  - Built `ReceiptScreen` featuring interactive `PdfPreview`, "Send on WhatsApp", "Share PDF", and "Print PDF" via `printing`.
+  - Verified zero CNIC leakage in PDF byte stream and visual output.
+- **FR-20 (Manual Guardian Reminders):**
+  - Added conditional "Send to Guardian" WhatsApp action on receipts and resident profiles when `guardianPhone` is present.
+- **UI & Route Integration:**
+  - Added WhatsApp reminder button on overdue/pending charges directly in `RentScreen`.
+  - Added unpaid dues reminder card in `ResidentDetailScreen` for active residents.
+  - Added post-payment dialog offering "View Receipt" (`context.push('/receipts/:id')`) and "Send WhatsApp Receipt" in `RecordPaymentSheet`.
+  - Added receipt preview button on all payment transactions in `ResidentLedgerScreen`.
+  - Wired `/receipts/:paymentId` route in `AppRouter`.
+- **Testing & Quality Assurance:**
+  - Added 8 new unit tests in `test/receipts_test.dart` (total 38 tests, all passing).
+  - Resolved `archive` dependency override (`^4.0.10`) for `image` decoder compatibility.
+  - Static analysis verified with 0 issues.
 
 ## Verification
 - flutter analyze: 0 issues
-- flutter test: 30 passed / 0 failed
+- flutter test: 38 passed / 0 failed
 - debug APK built: desugaring and all dependencies verified
-- Manual tests performed on device: Verified month switcher, payment validation, and running balance calculation
+- Security check: Zero CNIC leakage verified in WhatsApp messages and PDF receipts
 
 ## Mocked / partial / skipped (be honest)
-- PDF receipt sharing and WhatsApp prefilled reminder links will be built in Milestone M5.
+- In-app purchases and subscription paywall will be implemented in Milestone M6.
 
 ## Open issues & risks
 - None.
 
 ## Decisions & assumptions log
-- 2026-10-29 — All charges are indexed on the 1st of the month (`DateTime(year, month, 1)`) and rent due day is clamped between 1 and 28 to avoid month-length irregularities in February.
-- 2026-10-29 — Implemented 24-hour edit window for payments as per FR-16 to prevent retroactive tampering after ledger settlement.
+- 2026-10-29 — WhatsApp messages launched with `LaunchMode.externalApplication` to open the installed WhatsApp application cleanly, with a silent clipboard fallback when WhatsApp is unavailable.
+- 2026-10-29 — Strict enforcement: CNIC is never placed in WhatsApp texts or PDF receipts as mandated by security specification Section 8.1.
 
 ## Size & performance notes (from M7)
-- N/A for M4.
+- N/A for M5.
 
 ## Manual steps pending for the Human
 1. Run SQL schema from Section 7.2 in Supabase SQL editor (if not already done).
@@ -61,4 +64,4 @@ Last updated: 2026-10-29 01:50 PKT | Current milestone: M4 | Overall: 56% (5/9 m
 - None at this time.
 
 ## Next milestone preview
-- M5: Reminders & Receipts — WhatsApp service with number normalization and prefilled templates, PDF receipt generator (`pdf` + `printing`), and printable/shareable payment receipts — estimated 60 min.
+- M6: Monetization — Free trial logic (30 days or up to 10 residents), Google Play Billing integration via `in_app_purchase`, offline/debug mock fallback, Paywall screen, and trial banner — estimated 60 min.
