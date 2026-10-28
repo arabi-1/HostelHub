@@ -5,12 +5,15 @@ import 'package:go_router/go_router.dart';
 import '../config/env.dart';
 import '../strings.dart';
 import '../widgets/missing_config_screen.dart';
+import '../../data/models/room.dart';
 import '../../features/auth/login_screen.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../../features/auth/reset_password_screen.dart';
 import '../../features/auth/signup_screen.dart';
 import '../../features/dashboard/dashboard_screen.dart';
 import '../../features/residents/residents_screen.dart';
+import '../../features/rooms/properties_screen.dart';
+import '../../features/rooms/room_form_screen.dart';
 import '../../features/rooms/rooms_screen.dart';
 import '../../features/rent/rent_screen.dart';
 import '../../features/settings/settings_screen.dart';
@@ -84,6 +87,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/reset-password',
         builder: (context, state) => const ResetPasswordScreen(),
+      ),
+      GoRoute(
+        path: '/properties',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const PropertiesScreen(),
+      ),
+      GoRoute(
+        path: '/rooms/add',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final propId = state.uri.queryParameters['propertyId'];
+          return RoomFormScreen(initialPropertyId: propId);
+        },
+      ),
+      GoRoute(
+        path: '/rooms/edit',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final room = state.extra as Room?;
+          return RoomFormScreen(room: room);
+        },
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
