@@ -13,3 +13,7 @@
 # Core Library Desugaring & Java 8+ APIs
 -keep class j$.** { *; }
 -dontwarn java.lang.invoke.**
+
+# Flutter deferred components & Play Core warnings
+-dontwarn com.google.android.play.core.**
+-dontwarn io.flutter.embedding.engine.deferredcomponents.**
