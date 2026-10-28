@@ -5,12 +5,15 @@ import 'package:go_router/go_router.dart';
 import '../config/env.dart';
 import '../strings.dart';
 import '../widgets/missing_config_screen.dart';
+import '../../data/models/resident.dart';
 import '../../data/models/room.dart';
 import '../../features/auth/login_screen.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../../features/auth/reset_password_screen.dart';
 import '../../features/auth/signup_screen.dart';
 import '../../features/dashboard/dashboard_screen.dart';
+import '../../features/residents/resident_detail_screen.dart';
+import '../../features/residents/resident_form_screen.dart';
 import '../../features/residents/residents_screen.dart';
 import '../../features/rooms/properties_screen.dart';
 import '../../features/rooms/room_form_screen.dart';
@@ -107,6 +110,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final room = state.extra as Room?;
           return RoomFormScreen(room: room);
+        },
+      ),
+      GoRoute(
+        path: '/residents/add',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ResidentFormScreen(),
+      ),
+      GoRoute(
+        path: '/residents/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return ResidentDetailScreen(residentId: id);
+        },
+      ),
+      GoRoute(
+        path: '/residents/:id/edit',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final resident = state.extra as Resident?;
+          return ResidentFormScreen(resident: resident);
         },
       ),
       StatefulShellRoute.indexedStack(
