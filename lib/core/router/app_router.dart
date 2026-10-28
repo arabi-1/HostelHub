@@ -11,6 +11,7 @@ import '../../features/auth/login_screen.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../../features/auth/reset_password_screen.dart';
 import '../../features/auth/signup_screen.dart';
+import '../../features/billing/paywall_screen.dart';
 import '../../features/dashboard/dashboard_screen.dart';
 import '../../features/receipts/receipt_screen.dart';
 import '../../features/residents/resident_detail_screen.dart';
@@ -150,6 +151,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final paymentId = state.pathParameters['paymentId']!;
           return ReceiptScreen(paymentId: paymentId);
         },
+      ),
+      GoRoute(
+        path: '/paywall',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const PaywallScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
