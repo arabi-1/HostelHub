@@ -17,19 +17,23 @@ class ResetPasswordScreen extends ConsumerStatefulWidget {
 
 class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   final _emailKey = GlobalKey<FormState>();
-  final _otpKey = GlobalKey<FormState>();
+  final _resetFormKey = GlobalKey<FormState>();
 
   final _emailController = TextEditingController();
   final _otpController = TextEditingController();
   final _newPasswordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
   bool _codeSent = false;
+  bool _obscureNewPassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
     _emailController.dispose();
     _otpController.dispose();
     _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -46,7 +50,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Password reset instructions sent. Please check your email.'),
+          content: Text('A 6-digit recovery code has been sent to your email.'),
           backgroundColor: AppColors.success,
         ),
       );
@@ -62,11 +66,21 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   }
 
   Future<void> _verifyAndReset() async {
-    if (!_otpKey.currentState!.validate()) return;
+    if (!_resetFormKey.currentState!.validate()) return;
+
+    if (_newPasswordController.text != _confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Passwords do not match.'),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+      return;
+    }
 
     final success = await ref.read(authControllerProvider.notifier).verifyOtpAndResetPassword(
-          email: _emailController.text,
-          token: _otpController.text,
+          email: _emailController.text.trim(),
+          token: _otpController.text.trim(),
           newPassword: _newPasswordController.text,
         );
 
@@ -95,10 +109,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        foregroundColor: AppColors.ink,
-        elevation: 0,
-        title: const Text(AppStrings.resetPassword, style: TextStyle(color: AppColors.ink)),
+        title: const Text(AppStrings.resetPassword),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -106,19 +117,42 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Step indicator chip
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      _codeSent ? 'Step 2 of 2: Verify & Reset' : 'Step 1 of 2: Request Code',
+                      style: AppText.labelMedium.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
               Text(
-                _codeSent ? 'Enter Verification Code' : 'Forgot Password',
+                _codeSent ? 'Enter Code & New Password' : 'Forgot Password',
                 style: AppText.headlineLarge.copyWith(color: AppColors.primary),
               ),
               const SizedBox(height: 8),
               Text(
                 _codeSent
-                    ? 'Enter the 6-digit code sent to ${_emailController.text} and your new password.'
-                    : 'Enter your account email to receive a password recovery link or verification code.',
+                    ? 'Enter the 6-digit recovery code sent to ${_emailController.text} and your new password.'
+                    : 'Enter your registered email address to receive a 6-digit recovery code.',
                 style: AppText.bodyMedium.copyWith(color: AppColors.muted),
               ),
               const SizedBox(height: 28),
+
               if (!_codeSent) ...[
+                // Step 1 Form
                 Form(
                   key: _emailKey,
                   child: Column(
@@ -145,12 +179,18 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                         isLoading: authState.isLoading,
                         onPressed: _sendCode,
                       ),
+                      const SizedBox(height: 16),
+                      TextButton(
+                        onPressed: () => context.go('/login'),
+                        child: const Text('Back to Login'),
+                      ),
                     ],
                   ),
                 ),
               ] else ...[
+                // Step 2 & 3 Form
                 Form(
-                  key: _otpKey,
+                  key: _resetFormKey,
                   child: Column(
                     children: [
                       AppTextField(
@@ -163,6 +203,9 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                           if (val == null || val.trim().isEmpty) {
                             return AppStrings.requiredField;
                           }
+                          if (val.trim().length < 6) {
+                            return 'Enter the full 6-digit code';
+                          }
                           return null;
                         },
                       ),
@@ -171,14 +214,43 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                         controller: _newPasswordController,
                         label: AppStrings.newPassword,
                         hint: 'At least 8 characters',
-                        obscureText: true,
+                        obscureText: _obscureNewPassword,
                         prefixIcon: const Icon(Icons.lock_outline_rounded),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureNewPassword ? Icons.visibility_off : Icons.visibility,
+                          ),
+                          onPressed: () => setState(() => _obscureNewPassword = !_obscureNewPassword),
+                        ),
                         validator: (val) {
                           if (val == null || val.isEmpty) {
                             return AppStrings.requiredField;
                           }
                           if (val.length < 8) {
                             return AppStrings.passwordMinLength;
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      AppTextField(
+                        controller: _confirmPasswordController,
+                        label: 'Confirm New Password',
+                        hint: 'Re-enter your new password',
+                        obscureText: _obscureConfirmPassword,
+                        prefixIcon: const Icon(Icons.lock_outline_rounded),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                          ),
+                          onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                        ),
+                        validator: (val) {
+                          if (val == null || val.isEmpty) {
+                            return AppStrings.requiredField;
+                          }
+                          if (val != _newPasswordController.text) {
+                            return 'Passwords do not match';
                           }
                           return null;
                         },
@@ -190,9 +262,18 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                         onPressed: _verifyAndReset,
                       ),
                       const SizedBox(height: 12),
-                      TextButton(
-                        onPressed: () => setState(() => _codeSent = false),
-                        child: const Text('Back to enter email'),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          TextButton(
+                            onPressed: authState.isLoading ? null : _sendCode,
+                            child: const Text('Resend Code'),
+                          ),
+                          TextButton(
+                            onPressed: () => setState(() => _codeSent = false),
+                            child: const Text('Change Email'),
+                          ),
+                        ],
                       ),
                     ],
                   ),
