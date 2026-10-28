@@ -8,7 +8,6 @@ import '../../core/theme/app_text.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
-import '../../data/models/room.dart';
 import 'property_form_dialog.dart';
 import 'providers/room_providers.dart';
 
@@ -147,7 +146,7 @@ class RoomsScreen extends ConsumerWidget {
                     return ListView.separated(
                       padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 80),
                       itemCount: rooms.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      separatorBuilder: (_, index) => const SizedBox(height: 12),
                       itemBuilder: (context, index) {
                         final room = rooms[index];
                         final occupied = occupancyMap[room.id] ?? 0;

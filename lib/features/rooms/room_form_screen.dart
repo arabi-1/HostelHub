@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/strings.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_text.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_text_field.dart';
 import '../../data/models/room.dart';
@@ -159,7 +157,7 @@ class _RoomFormScreenState extends ConsumerState<RoomFormScreen> {
                     }
 
                     return DropdownButtonFormField<String>(
-                      value: _selectedPropertyId,
+                      initialValue: _selectedPropertyId,
                       decoration: const InputDecoration(
                         labelText: 'Property / Building',
                         prefixIcon: Icon(Icons.apartment_rounded),
