@@ -330,7 +330,7 @@ class ResidentLedgerScreen extends ConsumerWidget {
                                     ),
                                   ],
                                 ),
-                                if (trailingMenu != null) trailingMenu,
+                                ?trailingMenu,
                               ],
                             ),
                           ),

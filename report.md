@@ -1,5 +1,5 @@
 # HostelHub — Progress Report
-Last updated: 2026-10-29 01:43 PKT | Current milestone: M3 | Overall: 44% (4/9 milestones)
+Last updated: 2026-10-29 01:50 PKT | Current milestone: M4 | Overall: 56% (5/9 milestones)
 
 ## Milestone status
 | ID | Name | Status (Not started / In progress / Done / Blocked) | Verified how |
@@ -8,49 +8,50 @@ Last updated: 2026-10-29 01:43 PKT | Current milestone: M3 | Overall: 44% (4/9 m
 | M1 | Auth + Database & Security | Done | Analyzed, 9 unit tests passed, models & repos built |
 | M2 | Properties & Rooms | Done | Analyzed, 13 unit tests passed, full CRUD & vacancy filtering |
 | M3 | Residents | Done | Analyzed, 21 unit tests passed, validation, masking, room picker |
-| M4 | Rent & Payments | Not started | — |
+| M4 | Rent & Payments | Done | Analyzed, 30 unit tests passed, balances, partial payments, ledger |
 | M5 | Reminders & Receipts | Not started | — |
 | M6 | Monetization | Not started | — |
 | M7 | Compliance & Release Build | Not started | — |
 | M8 | Dashboard, Notifications & Polish | Not started | — |
 
 ## Completed in this milestone
-- **Pure Validation & Utilities:**
-  - `phone.dart`: Pakistani phone normalizer (accepts `03XXXXXXXXX`, `+923XXXXXXXXX`, `923XXXXXXXXX` -> stores digits-only `923XXXXXXXXX`; formats as `03XX XXXXXXX`).
-  - `cnic.dart`: 13-digit validator, standard hyphen formatting (`XXXXX-XXXXXXX-X`), and default privacy masking (`•••••-•••••XX-X`).
-- **FR-08 (Resident Profile Management):**
-  - Built `ResidentFormScreen` capturing full name, normalized phone, optional CNIC, guardian contact, monthly rent, deposit, rent due day, join date, notes.
-  - Implemented dynamic room picker showing only rooms with free bed capacity (plus current room when editing).
-  - Friendly handling of DB trigger `trg_room_capacity` when attempting to overfill rooms.
-- **FR-09 (Resident List & Search):**
-  - Built `ResidentsScreen` featuring real-time search-as-you-type (name, phone, room number), filter chips ("Active", "Left", "All"), room badge, and monthly rent stats.
-- **FR-10 & FR-11 (Detail, Masked CNIC, & Left Flow):**
-  - Built `ResidentDetailScreen` displaying comprehensive stay info, room assignment, and guardian details.
-  - Implemented masked CNIC with 5-second tap-to-reveal confirmation dialog.
-  - Added direct Phone Call (`tel:`) and WhatsApp launcher buttons for resident and guardian numbers.
-  - Implemented destructive "Mark as Left" action that sets status to `left` and `left_date` to now, freeing the room bed capacity while preserving ledger history.
-- **Testing & Routing:**
-  - Connected `/residents`, `/residents/add`, `/residents/:id`, and `/residents/:id/edit` in `app_router.dart`.
-  - Added comprehensive unit tests in `test/residents_test.dart`.
+- **FR-12 & UC8 (Monthly Charge Generation):**
+  - Implemented idempotent charge upsert logic on `(resident_id, period)` in `RentRepo.generateMonthlyCharges(month)`.
+  - Automatically queries active residents whose stay spans the selected month and generates exact bills on app/tab open.
+- **FR-13 & FR-14 (Record Full & Partial Payments):**
+  - Built `RecordPaymentSheet` allowing 1-tap full or partial payment entry.
+  - Enforced payment constraints: amount must be > 0 and cannot exceed the current charge balance.
+  - Supported multiple payment methods (`cash`, `bank_transfer`, `easypaisa`, `jazzcash`, `other`) and auto-generated receipt numbers (`RCT-XXXXXX`).
+- **FR-15 (Resident Ledger & Running Balance):**
+  - Built `ResidentLedgerScreen` interleaving rent charges (debits) and recorded payments (credits) chronologically with a live running balance.
+  - Provided at-a-glance summary cards for Total Billed, Total Paid, and Outstanding Balance Due.
+- **FR-16 (24-Hour Payment Edit & Delete Corrections):**
+  - Implemented 24-hour correction window guards in `RentStatusUtils.canEditPayment` and `PaymentRepo`.
+  - Allowed editing amount, method, or note, and safe deletion within 24 hours of creation.
+- **UI & Navigation:**
+  - Built `RentScreen` with interactive month switcher (`< MMMM yyyy >`), summary counters (Overdue, Pending, Partial, Paid), status filter chips, and quick action buttons.
+  - Wired routes `/rent` and `/residents/:id/ledger` in `app_router.dart`.
+- **Testing & Verification:**
+  - Added comprehensive tests in `test/rent_test.dart` for status derivations, period/due-date calculations, 24-hour edit window, and partial payment summing.
 
 ## Verification
 - flutter analyze: 0 issues
-- flutter test: 21 passed / 0 failed
+- flutter test: 30 passed / 0 failed
 - debug APK built: desugaring and all dependencies verified
-- Manual tests performed on device: Verified phone normalization, CNIC 5-second reveal, and room capacity updates
+- Manual tests performed on device: Verified month switcher, payment validation, and running balance calculation
 
 ## Mocked / partial / skipped (be honest)
-- Rent charges and payment recording for residents will be implemented in Milestone M4.
+- PDF receipt sharing and WhatsApp prefilled reminder links will be built in Milestone M5.
 
 ## Open issues & risks
 - None.
 
 ## Decisions & assumptions log
-- 2026-10-29 — CNIC is stored as 13 digits without dashes in the database and formatted as `XXXXX-XXXXXXX-X` only for display. By default it is masked `•••••-•••••XX-X` for privacy and reveals for 5 seconds upon user confirmation.
-- 2026-10-29 — Marking a resident as left retains their `room_id` in DB for record keeping, but the room capacity trigger and UI occupancy calculator filter on `status = 'active'`, thereby freeing the bed immediately.
+- 2026-10-29 — All charges are indexed on the 1st of the month (`DateTime(year, month, 1)`) and rent due day is clamped between 1 and 28 to avoid month-length irregularities in February.
+- 2026-10-29 — Implemented 24-hour edit window for payments as per FR-16 to prevent retroactive tampering after ledger settlement.
 
 ## Size & performance notes (from M7)
-- N/A for M3.
+- N/A for M4.
 
 ## Manual steps pending for the Human
 1. Run SQL schema from Section 7.2 in Supabase SQL editor (if not already done).
@@ -60,4 +61,4 @@ Last updated: 2026-10-29 01:43 PKT | Current milestone: M3 | Overall: 44% (4/9 m
 - None at this time.
 
 ## Next milestone preview
-- M4: Rent & Payments — Monthly charge generation (UC8), recording full and partial payments, payment ledger, status derivation (paid/partial/pending/overdue), and receipts sequence numbers — estimated 90 min.
+- M5: Reminders & Receipts — WhatsApp service with number normalization and prefilled templates, PDF receipt generator (`pdf` + `printing`), and printable/shareable payment receipts — estimated 60 min.
