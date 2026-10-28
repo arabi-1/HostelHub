@@ -8,6 +8,7 @@ import '../../core/theme/app_text.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
+import '../billing/widgets/write_lock_guard.dart';
 import 'property_form_dialog.dart';
 import 'providers/room_providers.dart';
 
@@ -40,6 +41,7 @@ class RoomsScreen extends ConsumerWidget {
         icon: const Icon(Icons.add),
         label: const Text('Add Room'),
         onPressed: () {
+          if (!WriteLockGuard.checkAndNavigate(context, ref)) return;
           final props = propertiesAsync.value ?? [];
           if (props.isEmpty) {
             PropertyFormDialog.show(context);
@@ -61,7 +63,11 @@ class RoomsScreen extends ConsumerWidget {
               message: 'Add your first property before configuring rooms.',
               icon: Icons.apartment_rounded,
               actionLabel: 'Add Property',
-              onAction: () => PropertyFormDialog.show(context),
+              onAction: () {
+                if (WriteLockGuard.checkAndNavigate(context, ref)) {
+                  PropertyFormDialog.show(context);
+                }
+              },
             );
           }
 

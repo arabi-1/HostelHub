@@ -11,6 +11,7 @@ import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
 import '../../core/widgets/status_chip.dart';
 import '../../data/models/room.dart';
+import '../billing/widgets/write_lock_guard.dart';
 import '../rooms/providers/room_providers.dart';
 import 'providers/resident_providers.dart';
 
@@ -35,7 +36,11 @@ class ResidentsScreen extends ConsumerWidget {
         foregroundColor: Colors.white,
         icon: const Icon(Icons.person_add_alt_1_rounded),
         label: const Text('Add Resident'),
-        onPressed: () => context.push('/residents/add'),
+        onPressed: () {
+          if (WriteLockGuard.checkAndNavigate(context, ref)) {
+            context.push('/residents/add');
+          }
+        },
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

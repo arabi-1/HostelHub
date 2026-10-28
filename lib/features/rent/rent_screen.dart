@@ -13,6 +13,7 @@ import '../../core/widgets/status_chip.dart';
 import '../../data/models/rent_charge.dart';
 import '../../data/models/resident.dart';
 import '../auth/providers/auth_provider.dart';
+import '../billing/widgets/write_lock_guard.dart';
 import '../receipts/services/whatsapp_service.dart';
 import 'providers/rent_providers.dart';
 import 'record_payment_sheet.dart';
@@ -343,6 +344,7 @@ class RentScreen extends ConsumerWidget {
                                       onPressed: isFullyPaid
                                           ? null
                                           : () {
+                                              if (!WriteLockGuard.checkAndNavigate(context, ref)) return;
                                               RecordPaymentSheet.show(
                                                 context: context,
                                                 charge: c,

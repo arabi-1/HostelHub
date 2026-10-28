@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/strings.dart';
 import '../../core/widgets/stat_card.dart';
+import '../billing/widgets/trial_banner.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -11,9 +12,13 @@ class DashboardScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text(AppStrings.navDashboard),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: const [
+      body: Column(
+        children: [
+          const TrialBanner(),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: const [
           StatCard(
             title: 'Monthly Collection',
             value: 'Rs 0',
@@ -60,6 +65,9 @@ class DashboardScreen extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+              ],
+            ),
           ),
         ],
       ),
