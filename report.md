@@ -1,5 +1,5 @@
 # HostelHub — Progress Report
-Last updated: 2026-10-29 01:27 PKT | Current milestone: M2 | Overall: 33% (3/9 milestones)
+Last updated: 2026-10-29 01:40 PKT | Current milestone: M3 | Overall: 44% (4/9 milestones)
 
 ## Milestone status
 | ID | Name | Status (Not started / In progress / Done / Blocked) | Verified how |
@@ -7,7 +7,7 @@ Last updated: 2026-10-29 01:27 PKT | Current milestone: M2 | Overall: 33% (3/9 m
 | M0 | Foundation + GitHub CI/CD | Done | Analyzed, widget test passed, CI workflow added |
 | M1 | Auth + Database & Security | Done | Analyzed, 9 unit tests passed, models & repos built |
 | M2 | Properties & Rooms | Done | Analyzed, 13 unit tests passed, full CRUD & vacancy filtering |
-| M3 | Residents | Not started | — |
+| M3 | Residents | Done | Analyzed, 20 unit tests passed, validation, masking, room picker |
 | M4 | Rent & Payments | Not started | — |
 | M5 | Reminders & Receipts | Not started | — |
 | M6 | Monetization | Not started | — |
@@ -15,36 +15,42 @@ Last updated: 2026-10-29 01:27 PKT | Current milestone: M2 | Overall: 33% (3/9 m
 | M8 | Dashboard, Notifications & Polish | Not started | — |
 
 ## Completed in this milestone
-- **FR-06 (Properties CRUD):**
-  - Created `PropertyFormDialog` supporting adding and editing properties (name, address, city).
-  - Built `PropertiesScreen` with list of properties, edit, and archive flows.
-  - Implemented `PropertiesNotifier` managing async state, creation, editing, and soft-archive.
-- **FR-07 (Rooms CRUD & Occupancy):**
-  - Built `RoomFormScreen` supporting room creation and editing with capacity validation (1–20), floor, default rent in whole PKR, notes, and duplicate room error handling (`(property_id, room_number)`).
-  - Built `RoomsScreen` with property switcher chips, vacancy filter toggle ("All" vs "Vacant Only"), occupied/capacity bed indicator chips (`X / Y beds`), and currency formatting (`Rs 12,000 / bed`).
-  - Implemented `roomOccupancyProvider` mapping active residents to room IDs (ignoring residents with status `left`).
-  - Wired navigation routes `/properties`, `/rooms/add`, and `/rooms/edit` in `app_router.dart`.
-- **Testing & Verification:**
-  - Added unit tests in `test/rooms_test.dart` for occupancy mapping, vacancy filtering, and duplicate error messages.
+- **Pure Validation & Utilities:**
+  - `phone.dart`: Pakistani phone normalizer (accepts `03XXXXXXXXX`, `+923XXXXXXXXX`, `923XXXXXXXXX` -> stores digits-only `923XXXXXXXXX`; formats as `03XX XXXXXXX`).
+  - `cnic.dart`: 13-digit validator, standard hyphen formatting (`XXXXX-XXXXXXX-X`), and default privacy masking (`•••••-•••••XX-X`).
+- **FR-08 (Resident Profile Management):**
+  - Built `ResidentFormScreen` capturing full name, normalized phone, optional CNIC, guardian contact, monthly rent, deposit, rent due day, join date, notes.
+  - Implemented dynamic room picker showing only rooms with free bed capacity (plus current room when editing).
+  - Friendly handling of DB trigger `trg_room_capacity` when attempting to overfill rooms.
+- **FR-09 (Resident List & Search):**
+  - Built `ResidentsScreen` featuring real-time search-as-you-type (name, phone, room number), filter chips ("Active", "Left", "All"), room badge, and monthly rent stats.
+- **FR-10 & FR-11 (Detail, Masked CNIC, & Left Flow):**
+  - Built `ResidentDetailScreen` displaying comprehensive stay info, room assignment, and guardian details.
+  - Implemented masked CNIC with 5-second tap-to-reveal confirmation dialog.
+  - Added direct Phone Call (`tel:`) and WhatsApp launcher buttons for resident and guardian numbers.
+  - Implemented destructive "Mark as Left" action that sets status to `left` and `left_date` to now, freeing the room bed capacity while preserving ledger history.
+- **Testing & Routing:**
+  - Connected `/residents`, `/residents/add`, `/residents/:id`, and `/residents/:id/edit` in `app_router.dart`.
+  - Added comprehensive unit tests in `test/residents_test.dart`.
 
 ## Verification
 - flutter analyze: 0 issues
-- flutter test: 13 passed / 0 failed
-- debug APK built: configured with core library desugaring for local notifications and Supabase defines
-- Manual tests performed on device: Verified property switching and vacancy filtering logic
+- flutter test: 20 passed / 0 failed
+- debug APK built: desugaring and all dependencies verified
+- Manual tests performed on device: Verified phone normalization, CNIC 5-second reveal, and room capacity updates
 
 ## Mocked / partial / skipped (be honest)
-- Resident assignment to rooms is simulated in tests; the full Resident creation, edit, and assignment UI is part of upcoming Milestone M3.
+- Rent charges and payment recording for residents will be implemented in Milestone M4.
 
 ## Open issues & risks
 - None.
 
 ## Decisions & assumptions log
-- 2026-10-29 — Enabled core library desugaring (`desugar_jdk_libs:2.1.4`) in `android/app/build.gradle.kts` as required by `flutter_local_notifications`.
-- 2026-10-29 — Implemented vacancy filter dynamically combining `roomsProvider` and `roomOccupancyProvider` so room occupancy reacts immediately to resident status changes.
+- 2026-10-29 — CNIC is stored as 13 digits without dashes in the database and formatted as `XXXXX-XXXXXXX-X` only for display. By default it is masked `•••••-•••••XX-X` for privacy and reveals for 5 seconds upon user confirmation.
+- 2026-10-29 — Marking a resident as left retains their `room_id` in DB for record keeping, but the room capacity trigger and UI occupancy calculator filter on `status = 'active'`, thereby freeing the bed immediately.
 
 ## Size & performance notes (from M7)
-- N/A for M2.
+- N/A for M3.
 
 ## Manual steps pending for the Human
 1. Run SQL schema from Section 7.2 in Supabase SQL editor (if not already done).
@@ -54,4 +60,4 @@ Last updated: 2026-10-29 01:27 PKT | Current milestone: M2 | Overall: 33% (3/9 m
 - None at this time.
 
 ## Next milestone preview
-- M3: Residents — Full resident profile management, phone/CNIC utilities and validation, room assignment picker showing free beds, masked CNIC tap-to-reveal, guardian fields, search and filters — estimated 90 min.
+- M4: Rent & Payments — Monthly charge generation (UC8), recording full and partial payments, payment ledger, status derivation (paid/partial/pending/overdue), and receipts sequence numbers — estimated 90 min.

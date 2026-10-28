@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../data/models/resident.dart';
 import '../../../data/models/room.dart';
-import '../../../data/repositories/resident_repo.dart';
 import '../../rooms/providers/room_providers.dart';
 
 // Resident Filter: 'active', 'left', 'all'
