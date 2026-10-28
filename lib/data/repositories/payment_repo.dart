@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../core/utils/rent_status.dart';
 import '../models/payment.dart';
 import '../supabase_client.dart';
 
@@ -38,7 +39,7 @@ class PaymentRepo {
     data.remove('id');
     data.remove('created_at');
     if (payment.receiptNo.isEmpty) {
-      data.remove('receipt_no'); // let sequence default generate RCT-XXXXXX
+      data.remove('receipt_no'); // Database sequence generates RCT-XXXXXX
     }
 
     final response = await _effectiveClient
@@ -48,5 +49,37 @@ class PaymentRepo {
         .single();
 
     return Payment.fromJson(response);
+  }
+
+  /// Updates an existing payment record within 24 hours of creation (FR-16).
+  Future<Payment> updatePayment(Payment payment) async {
+    if (!RentStatusUtils.canEditPayment(payment.createdAt)) {
+      throw Exception('Payments can only be edited within 24 hours of creation.');
+    }
+
+    final data = {
+      'amount': payment.amount,
+      'method': payment.method,
+      'paid_on': payment.paidOn.toIso8601String().substring(0, 10),
+      'note': payment.note,
+    };
+
+    final response = await _effectiveClient
+        .from('payments')
+        .update(data)
+        .eq('id', payment.id)
+        .select()
+        .single();
+
+    return Payment.fromJson(response);
+  }
+
+  /// Deletes a payment record within 24 hours of creation (FR-16).
+  Future<void> deletePayment(String paymentId, DateTime createdAt) async {
+    if (!RentStatusUtils.canEditPayment(createdAt)) {
+      throw Exception('Payments can only be deleted within 24 hours of creation.');
+    }
+
+    await _effectiveClient.from('payments').delete().eq('id', paymentId);
   }
 }
