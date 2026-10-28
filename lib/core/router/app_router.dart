@@ -22,6 +22,7 @@ import '../../features/rooms/room_form_screen.dart';
 import '../../features/rooms/rooms_screen.dart';
 import '../../features/rent/rent_screen.dart';
 import '../../features/rent/resident_ledger_screen.dart';
+import '../../features/settings/privacy_policy_screen.dart';
 import '../../features/settings/settings_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -64,10 +65,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isAuthRoute = state.uri.path == '/login' ||
           state.uri.path == '/signup' ||
           state.uri.path == '/reset-password';
+      final isPublicRoute = isAuthRoute || state.uri.path == '/privacy-policy';
 
-      // Unauthenticated users must stay on auth routes
+      // Unauthenticated users must stay on auth or public routes
       if (currentUser == null) {
-        return isAuthRoute ? null : '/login';
+        return isPublicRoute ? null : '/login';
       }
 
       // Authenticated users on auth routes are redirected to home
@@ -156,6 +158,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/paywall',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const PaywallScreen(),
+      ),
+      GoRoute(
+        path: '/privacy-policy',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const PrivacyPolicyScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
