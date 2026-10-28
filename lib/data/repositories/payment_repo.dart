@@ -62,6 +62,30 @@ class PaymentRepo {
     return Payment.fromJson(response);
   }
 
+  /// Fetches the most recent payments with resident information.
+  Future<List<Map<String, dynamic>>> getRecentPayments({int limit = 5}) async {
+    try {
+      final response = await _effectiveClient
+          .from('payments')
+          .select('*, residents(full_name)')
+          .order('paid_on', ascending: false)
+          .order('created_at', ascending: false)
+          .limit(limit);
+
+      return (response as List<dynamic>).cast<Map<String, dynamic>>();
+    } catch (_) {
+      // Fallback without join
+      final response = await _effectiveClient
+          .from('payments')
+          .select()
+          .order('paid_on', ascending: false)
+          .order('created_at', ascending: false)
+          .limit(limit);
+
+      return (response as List<dynamic>).cast<Map<String, dynamic>>();
+    }
+  }
+
   /// Updates an existing payment record within 24 hours of creation (FR-16).
   Future<Payment> updatePayment(Payment payment) async {
     if (!RentStatusUtils.canEditPayment(payment.createdAt)) {
