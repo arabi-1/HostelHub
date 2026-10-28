@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text.dart';
@@ -283,32 +284,36 @@ class SettingsScreen extends ConsumerWidget {
               ListTile(
                 leading: const Icon(Icons.privacy_tip_outlined),
                 title: const Text(AppStrings.privacyPolicy),
+                subtitle: const Text('Read full data & CNIC privacy safeguards'),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (ctx) => AlertDialog(
-                      title: const Text(AppStrings.privacyPolicy),
-                      content: const SingleChildScrollView(
-                        child: Text(
-                          'HostelHub values your privacy. All hostel resident data, payment ledgers, and contact information remain secure under Row-Level Security policies. Sensitive fields like CNIC are stored securely and masked across the UI. You may request complete account and data deletion at any time.',
-                        ),
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(ctx).pop(),
-                          child: const Text('Close'),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                onTap: () => context.push('/privacy-policy'),
               ),
               const Divider(),
               ListTile(
-                leading: const Icon(Icons.info_outline),
-                title: const Text(AppStrings.about),
-                subtitle: const Text('HostelHub v1.0.0 — Pakistan Hostel Rent Manager'),
+                leading: const Icon(Icons.mail_outline_rounded),
+                title: const Text('Contact Support'),
+                subtitle: const Text('support@hostelhub.app'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () async {
+                  final uri = Uri.parse('mailto:support@hostelhub.app?subject=HostelHub%20Support');
+                  try {
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri);
+                    }
+                  } catch (_) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Contact support at support@hostelhub.app')),
+                      );
+                    }
+                  }
+                },
+              ),
+              const Divider(),
+              const ListTile(
+                leading: Icon(Icons.info_outline_rounded),
+                title: Text('App Version'),
+                subtitle: Text('1.0.0+1 (Build 1) • Pakistan PG Manager'),
               ),
               const Divider(),
               ListTile(
