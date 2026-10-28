@@ -19,6 +19,7 @@ import '../../features/rooms/properties_screen.dart';
 import '../../features/rooms/room_form_screen.dart';
 import '../../features/rooms/rooms_screen.dart';
 import '../../features/rent/rent_screen.dart';
+import '../../features/rent/resident_ledger_screen.dart';
 import '../../features/settings/settings_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -131,6 +132,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final resident = state.extra as Resident?;
           return ResidentFormScreen(resident: resident);
+        },
+      ),
+      GoRoute(
+        path: '/residents/:id/ledger',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return ResidentLedgerScreen(residentId: id);
         },
       ),
       StatefulShellRoute.indexedStack(
