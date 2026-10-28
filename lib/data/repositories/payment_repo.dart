@@ -34,6 +34,17 @@ class PaymentRepo {
         .toList();
   }
 
+  Future<Payment?> getPaymentById(String paymentId) async {
+    final response = await _effectiveClient
+        .from('payments')
+        .select()
+        .eq('id', paymentId)
+        .maybeSingle();
+
+    if (response == null) return null;
+    return Payment.fromJson(response);
+  }
+
   Future<Payment> recordPayment(Payment payment) async {
     final data = payment.toJson();
     data.remove('id');

@@ -31,6 +31,17 @@ class RoomRepo {
         .toList();
   }
 
+  Future<Room?> getRoomById(String roomId) async {
+    final response = await _effectiveClient
+        .from('rooms')
+        .select()
+        .eq('id', roomId)
+        .maybeSingle();
+
+    if (response == null) return null;
+    return Room.fromJson(response);
+  }
+
   Future<Room> createRoom(Room room) async {
     final data = room.toJson();
     data.remove('id');
