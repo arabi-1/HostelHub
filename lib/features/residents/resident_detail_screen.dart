@@ -14,6 +14,9 @@ import '../../core/widgets/loading_view.dart';
 import '../../core/widgets/status_chip.dart';
 import '../../data/models/resident.dart';
 import '../../data/models/room.dart';
+import '../auth/providers/auth_provider.dart';
+import '../receipts/services/whatsapp_service.dart';
+import '../rent/providers/rent_providers.dart';
 import '../rooms/providers/room_providers.dart';
 import 'providers/resident_providers.dart';
 
@@ -52,6 +55,29 @@ class _ResidentDetailScreenState extends ConsumerState<ResidentDetailScreen> {
           setState(() => _isCnicRevealed = false);
         }
       });
+    }
+  }
+
+  Future<void> _sendRentReminder(Resident resident, double balance) async {
+    final profile = await ref.read(currentProfileProvider.future);
+    final bName = profile?.businessName;
+    final businessName = (bName != null && bName.trim().isNotEmpty) ? bName.trim() : 'HostelHub';
+
+    final message = WhatsAppService.buildReminderMessage(
+      residentName: resident.fullName,
+      businessName: businessName,
+      balance: balance,
+      period: DateTime(DateTime.now().year, DateTime.now().month, 1),
+      dueDate: DateTime(DateTime.now().year, DateTime.now().month, resident.rentDueDay),
+      isOverdue: DateTime.now().day > resident.rentDueDay,
+    );
+
+    if (mounted) {
+      await WhatsAppService.launchOrCopy(
+        context: context,
+        phone: resident.phone,
+        message: message,
+      );
     }
   }
 
@@ -115,6 +141,7 @@ class _ResidentDetailScreenState extends ConsumerState<ResidentDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final residentAsync = ref.watch(residentDetailProvider(widget.residentId));
+    final ledgerAsync = ref.watch(residentLedgerProvider(widget.residentId));
     final roomsAsync = ref.watch(roomsProvider);
     final roomsList = roomsAsync.value ?? [];
     final roomsMap = <String, Room>{for (final rm in roomsList) rm.id: rm};
@@ -228,6 +255,51 @@ class _ResidentDetailScreenState extends ConsumerState<ResidentDetailScreen> {
                 ],
               ),
               const SizedBox(height: 16),
+
+              // Unpaid Dues & WhatsApp Reminder (FR-17, FR-18)
+              if (resident.isActive && (ledgerAsync.value?.totalBalance ?? 0) > 0) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.dangerContainer,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.warning_amber_rounded, color: AppColors.danger),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Unpaid Dues: Rs ${currencyFormatter.format((ledgerAsync.value?.totalBalance ?? 0).toInt())}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.danger,
+                              ),
+                            ),
+                            const Text(
+                              'Rent reminder ready to send',
+                              style: TextStyle(fontSize: 12, color: AppColors.muted),
+                            ),
+                          ],
+                        ),
+                      ),
+                      FilledButton.tonalIcon(
+                        icon: const Icon(Icons.chat, size: 16),
+                        label: const Text('Send Reminder'),
+                        onPressed: () => _sendRentReminder(
+                          resident,
+                          ledgerAsync.value!.totalBalance,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
 
               // Rent & Room Information
               Card(

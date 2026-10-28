@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/strings.dart';
 import '../../core/theme/app_colors.dart';
@@ -253,22 +254,31 @@ class ResidentLedgerScreen extends ConsumerWidget {
                           final payment = entry.rawItem as Payment;
                           final isEditable = RentStatusUtils.canEditPayment(payment.createdAt);
 
-                          if (isEditable) {
-                            trailingMenu = PopupMenuButton<String>(
-                              icon: const Icon(Icons.more_vert, size: 20, color: AppColors.muted),
-                              onSelected: (val) {
-                                if (val == 'edit') {
-                                  _handleEditPayment(context, ref, payment);
-                                } else if (val == 'delete') {
-                                  _handleDeletePayment(context, ref, payment);
-                                }
-                              },
-                              itemBuilder: (ctx) => const [
-                                PopupMenuItem(value: 'edit', child: Text('Edit Payment (24h)')),
-                                PopupMenuItem(value: 'delete', child: Text('Delete Payment (24h)')),
-                              ],
-                            );
-                          }
+                          trailingMenu = Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.receipt_outlined, size: 20, color: AppColors.primary),
+                                tooltip: 'View Receipt',
+                                onPressed: () => context.push('/receipts/${payment.id}'),
+                              ),
+                              if (isEditable)
+                                PopupMenuButton<String>(
+                                  icon: const Icon(Icons.more_vert, size: 20, color: AppColors.muted),
+                                  onSelected: (val) {
+                                    if (val == 'edit') {
+                                      _handleEditPayment(context, ref, payment);
+                                    } else if (val == 'delete') {
+                                      _handleDeletePayment(context, ref, payment);
+                                    }
+                                  },
+                                  itemBuilder: (ctx) => const [
+                                    PopupMenuItem(value: 'edit', child: Text('Edit Payment (24h)')),
+                                    PopupMenuItem(value: 'delete', child: Text('Delete Payment (24h)')),
+                                  ],
+                                ),
+                            ],
+                          );
                         }
 
                         return Card(

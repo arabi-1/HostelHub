@@ -10,11 +10,43 @@ import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
 import '../../core/widgets/status_chip.dart';
+import '../../data/models/rent_charge.dart';
+import '../../data/models/resident.dart';
+import '../auth/providers/auth_provider.dart';
+import '../receipts/services/whatsapp_service.dart';
 import 'providers/rent_providers.dart';
 import 'record_payment_sheet.dart';
 
 class RentScreen extends ConsumerWidget {
   const RentScreen({super.key});
+
+  Future<void> _sendWhatsAppReminder(
+    BuildContext context,
+    WidgetRef ref,
+    RentCharge charge,
+    Resident resident,
+  ) async {
+    final profile = await ref.read(currentProfileProvider.future);
+    final bName = profile?.businessName;
+    final businessName = (bName != null && bName.trim().isNotEmpty) ? bName.trim() : 'HostelHub';
+
+    final message = WhatsAppService.buildReminderMessage(
+      residentName: resident.fullName,
+      businessName: businessName,
+      balance: charge.balance,
+      period: charge.period,
+      dueDate: charge.dueDate,
+      isOverdue: charge.status == 'overdue',
+    );
+
+    if (context.mounted) {
+      await WhatsAppService.launchOrCopy(
+        context: context,
+        phone: resident.phone,
+        message: message,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -292,7 +324,15 @@ class RentScreen extends ConsumerWidget {
                                           : null,
                                     ),
                                   ),
-                                  const SizedBox(width: 12),
+                                  if (!isFullyPaid && resident != null) ...[
+                                    const SizedBox(width: 8),
+                                    IconButton.filledTonal(
+                                      icon: const Icon(Icons.chat_outlined, size: 18),
+                                      tooltip: 'Remind on WhatsApp',
+                                      onPressed: () => _sendWhatsAppReminder(context, ref, c, resident),
+                                    ),
+                                  ],
+                                  const SizedBox(width: 8),
                                   Expanded(
                                     child: AppButton(
                                       text: isFullyPaid ? 'Paid in Full' : 'Record Pay',

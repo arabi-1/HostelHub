@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_text_field.dart';
+import '../../data/models/payment.dart';
 import '../../data/models/rent_charge.dart';
 import '../../data/models/resident.dart';
+import '../auth/providers/auth_provider.dart';
+import '../receipts/services/whatsapp_service.dart';
 import 'providers/rent_providers.dart';
 
 class RecordPaymentSheet extends ConsumerStatefulWidget {
@@ -25,8 +29,8 @@ class RecordPaymentSheet extends ConsumerStatefulWidget {
     required BuildContext context,
     required RentCharge charge,
     Resident? resident,
-  }) {
-    return showModalBottomSheet(
+  }) async {
+    final payment = await showModalBottomSheet<Payment>(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
@@ -37,6 +41,67 @@ class RecordPaymentSheet extends ConsumerStatefulWidget {
         child: RecordPaymentSheet(charge: charge, resident: resident),
       ),
     );
+
+    if (payment != null && context.mounted) {
+      final remainingBalance = charge.balance - payment.amount;
+      showDialog(
+        context: context,
+        builder: (dialogCtx) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Payment Recorded'),
+          content: Text(
+            'Payment of Rs ${payment.amount.toInt()} has been recorded.\nReceipt: ${payment.receiptNo}',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogCtx).pop(),
+              child: const Text('Done'),
+            ),
+            if (resident != null)
+              TextButton.icon(
+                icon: const Icon(Icons.chat, size: 18),
+                label: const Text('Send WhatsApp'),
+                onPressed: () async {
+                  Navigator.of(dialogCtx).pop();
+                  final container = ProviderScope.containerOf(context);
+                  final profile = await container.read(currentProfileProvider.future);
+                  final bName = profile?.businessName;
+                  final businessName = (bName != null && bName.trim().isNotEmpty)
+                      ? bName.trim()
+                      : 'HostelHub';
+
+                  final message = WhatsAppService.buildReceiptMessage(
+                    receiptNo: payment.receiptNo,
+                    businessName: businessName,
+                    amount: payment.amount,
+                    residentName: resident.fullName,
+                    period: charge.period,
+                    paidOn: payment.paidOn,
+                    method: payment.method,
+                    balance: remainingBalance < 0 ? 0 : remainingBalance,
+                  );
+
+                  if (context.mounted) {
+                    await WhatsAppService.launchOrCopy(
+                      context: context,
+                      phone: resident.phone,
+                      message: message,
+                    );
+                  }
+                },
+              ),
+            FilledButton.icon(
+              icon: const Icon(Icons.receipt_long, size: 18),
+              label: const Text('View Receipt'),
+              onPressed: () {
+                Navigator.of(dialogCtx).pop();
+                context.push('/receipts/${payment.id}');
+              },
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   @override
@@ -125,13 +190,7 @@ class _RecordPaymentSheetState extends ConsumerState<RecordPaymentSheet> {
           );
 
       if (mounted) {
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Payment of Rs ${amount.toInt()} recorded. Receipt: ${payment.receiptNo}'),
-            backgroundColor: AppColors.success,
-          ),
-        );
+        Navigator.of(context).pop(payment);
       }
     } catch (e) {
       if (mounted) {
