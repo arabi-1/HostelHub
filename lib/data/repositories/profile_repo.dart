@@ -3,12 +3,14 @@ import '../models/profile.dart';
 import '../supabase_client.dart';
 
 class ProfileRepo {
-  final SupabaseClient _client;
+  final SupabaseClient? _client;
 
-  ProfileRepo([SupabaseClient? client]) : _client = client ?? supabaseClient;
+  ProfileRepo([SupabaseClient? client]) : _client = client;
+
+  SupabaseClient get _effectiveClient => _client ?? supabaseClient;
 
   Future<Profile?> getProfile(String userId) async {
-    final response = await _client
+    final response = await _effectiveClient
         .from('profiles')
         .select()
         .eq('id', userId)
@@ -23,7 +25,7 @@ class ProfileRepo {
     data.remove('id'); // ID is immutable primary key
     data.remove('created_at');
 
-    final response = await _client
+    final response = await _effectiveClient
         .from('profiles')
         .update(data)
         .eq('id', profile.id)

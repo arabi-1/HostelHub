@@ -3,12 +3,14 @@ import '../models/property.dart';
 import '../supabase_client.dart';
 
 class PropertyRepo {
-  final SupabaseClient _client;
+  final SupabaseClient? _client;
 
-  PropertyRepo([SupabaseClient? client]) : _client = client ?? supabaseClient;
+  PropertyRepo([SupabaseClient? client]) : _client = client;
+
+  SupabaseClient get _effectiveClient => _client ?? supabaseClient;
 
   Future<List<Property>> getProperties({bool activeOnly = true}) async {
-    var query = _client.from('properties').select();
+    var query = _effectiveClient.from('properties').select();
     if (activeOnly) {
       query = query.eq('is_active', true);
     }
@@ -23,7 +25,7 @@ class PropertyRepo {
     data.remove('id'); // let Postgres generate UUID
     data.remove('created_at');
 
-    final response = await _client
+    final response = await _effectiveClient
         .from('properties')
         .insert(data)
         .select()
@@ -37,7 +39,7 @@ class PropertyRepo {
     data.remove('id');
     data.remove('created_at');
 
-    final response = await _client
+    final response = await _effectiveClient
         .from('properties')
         .update(data)
         .eq('id', property.id)
@@ -48,7 +50,7 @@ class PropertyRepo {
   }
 
   Future<void> archiveProperty(String propertyId) async {
-    await _client
+    await _effectiveClient
         .from('properties')
         .update({'is_active': false})
         .eq('id', propertyId);

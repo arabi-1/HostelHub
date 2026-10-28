@@ -3,12 +3,14 @@ import '../models/room.dart';
 import '../supabase_client.dart';
 
 class RoomRepo {
-  final SupabaseClient _client;
+  final SupabaseClient? _client;
 
-  RoomRepo([SupabaseClient? client]) : _client = client ?? supabaseClient;
+  RoomRepo([SupabaseClient? client]) : _client = client;
+
+  SupabaseClient get _effectiveClient => _client ?? supabaseClient;
 
   Future<List<Room>> getRooms(String propertyId, {bool activeOnly = true}) async {
-    var query = _client.from('rooms').select().eq('property_id', propertyId);
+    var query = _effectiveClient.from('rooms').select().eq('property_id', propertyId);
     if (activeOnly) {
       query = query.eq('is_active', true);
     }
@@ -19,7 +21,7 @@ class RoomRepo {
   }
 
   Future<List<Room>> getAllRooms({bool activeOnly = true}) async {
-    var query = _client.from('rooms').select();
+    var query = _effectiveClient.from('rooms').select();
     if (activeOnly) {
       query = query.eq('is_active', true);
     }
@@ -34,7 +36,7 @@ class RoomRepo {
     data.remove('id');
     data.remove('created_at');
 
-    final response = await _client
+    final response = await _effectiveClient
         .from('rooms')
         .insert(data)
         .select()
@@ -48,7 +50,7 @@ class RoomRepo {
     data.remove('id');
     data.remove('created_at');
 
-    final response = await _client
+    final response = await _effectiveClient
         .from('rooms')
         .update(data)
         .eq('id', room.id)

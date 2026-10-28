@@ -3,12 +3,14 @@ import '../models/payment.dart';
 import '../supabase_client.dart';
 
 class PaymentRepo {
-  final SupabaseClient _client;
+  final SupabaseClient? _client;
 
-  PaymentRepo([SupabaseClient? client]) : _client = client ?? supabaseClient;
+  PaymentRepo([SupabaseClient? client]) : _client = client;
+
+  SupabaseClient get _effectiveClient => _client ?? supabaseClient;
 
   Future<List<Payment>> getPaymentsForCharge(String chargeId) async {
-    final response = await _client
+    final response = await _effectiveClient
         .from('payments')
         .select()
         .eq('charge_id', chargeId)
@@ -20,7 +22,7 @@ class PaymentRepo {
   }
 
   Future<List<Payment>> getPaymentsForResident(String residentId) async {
-    final response = await _client
+    final response = await _effectiveClient
         .from('payments')
         .select()
         .eq('resident_id', residentId)
@@ -39,7 +41,7 @@ class PaymentRepo {
       data.remove('receipt_no'); // let sequence default generate RCT-XXXXXX
     }
 
-    final response = await _client
+    final response = await _effectiveClient
         .from('payments')
         .insert(data)
         .select()

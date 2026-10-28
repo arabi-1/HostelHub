@@ -1,21 +1,25 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../core/config/env.dart';
 import '../supabase_client.dart';
 
 class AuthRepo {
-  final SupabaseClient _client;
+  final SupabaseClient? _client;
 
-  AuthRepo([SupabaseClient? client]) : _client = client ?? supabaseClient;
+  AuthRepo([SupabaseClient? client])
+      : _client = client ?? (Env.isConfigured ? supabaseClientOrNull : null);
 
-  User? get currentUser => _client.auth.currentUser;
-  Session? get currentSession => _client.auth.currentSession;
-  Stream<AuthState> get authStateChanges => _client.auth.onAuthStateChange;
+  User? get currentUser => _client?.auth.currentUser;
+  Session? get currentSession => _client?.auth.currentSession;
+  Stream<AuthState> get authStateChanges =>
+      _client != null ? _client.auth.onAuthStateChange : const Stream.empty();
 
   Future<AuthResponse> signUp({
     required String email,
     required String password,
     required String fullName,
   }) async {
-    final response = await _client.auth.signUp(
+    final client = _client ?? supabaseClient;
+    final response = await client.auth.signUp(
       email: email,
       password: password,
       data: {'full_name': fullName},
@@ -27,7 +31,8 @@ class AuthRepo {
     required String email,
     required String password,
   }) async {
-    final response = await _client.auth.signInWithPassword(
+    final client = _client ?? supabaseClient;
+    final response = await client.auth.signInWithPassword(
       email: email,
       password: password,
     );
@@ -35,11 +40,13 @@ class AuthRepo {
   }
 
   Future<void> signOut() async {
-    await _client.auth.signOut();
+    final client = _client ?? supabaseClient;
+    await client.auth.signOut();
   }
 
   Future<void> sendPasswordResetEmail(String email) async {
-    await _client.auth.resetPasswordForEmail(email);
+    final client = _client ?? supabaseClient;
+    await client.auth.resetPasswordForEmail(email);
   }
 
   Future<void> verifyOtpAndResetPassword({
@@ -47,18 +54,20 @@ class AuthRepo {
     required String token,
     required String newPassword,
   }) async {
-    await _client.auth.verifyOTP(
+    final client = _client ?? supabaseClient;
+    await client.auth.verifyOTP(
       email: email,
       token: token,
       type: OtpType.recovery,
     );
-    await _client.auth.updateUser(
+    await client.auth.updateUser(
       UserAttributes(password: newPassword),
     );
   }
 
   Future<void> deleteAccount() async {
-    await _client.rpc('delete_my_account');
+    final client = _client ?? supabaseClient;
+    await client.rpc('delete_my_account');
     await signOut();
   }
 }

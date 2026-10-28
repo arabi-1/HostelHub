@@ -3,12 +3,14 @@ import '../models/resident.dart';
 import '../supabase_client.dart';
 
 class ResidentRepo {
-  final SupabaseClient _client;
+  final SupabaseClient? _client;
 
-  ResidentRepo([SupabaseClient? client]) : _client = client ?? supabaseClient;
+  ResidentRepo([SupabaseClient? client]) : _client = client;
+
+  SupabaseClient get _effectiveClient => _client ?? supabaseClient;
 
   Future<List<Resident>> getResidents({bool activeOnly = true}) async {
-    var query = _client.from('residents').select();
+    var query = _effectiveClient.from('residents').select();
     if (activeOnly) {
       query = query.eq('status', 'active');
     }
@@ -19,7 +21,7 @@ class ResidentRepo {
   }
 
   Future<Resident?> getResidentById(String residentId) async {
-    final response = await _client
+    final response = await _effectiveClient
         .from('residents')
         .select()
         .eq('id', residentId)
@@ -34,7 +36,7 @@ class ResidentRepo {
     data.remove('id');
     data.remove('created_at');
 
-    final response = await _client
+    final response = await _effectiveClient
         .from('residents')
         .insert(data)
         .select()
@@ -48,7 +50,7 @@ class ResidentRepo {
     data.remove('id');
     data.remove('created_at');
 
-    final response = await _client
+    final response = await _effectiveClient
         .from('residents')
         .update(data)
         .eq('id', resident.id)
@@ -59,7 +61,7 @@ class ResidentRepo {
   }
 
   Future<void> markResidentLeft(String residentId, DateTime leftDate) async {
-    await _client.from('residents').update({
+    await _effectiveClient.from('residents').update({
       'status': 'left',
       'left_date': leftDate.toIso8601String().substring(0, 10),
     }).eq('id', residentId);

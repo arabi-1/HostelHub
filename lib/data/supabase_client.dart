@@ -4,6 +4,14 @@ import '../core/config/env.dart';
 
 SupabaseClient get supabaseClient => Supabase.instance.client;
 
+SupabaseClient? get supabaseClientOrNull {
+  try {
+    return Supabase.instance.client;
+  } catch (_) {
+    return null;
+  }
+}
+
 Future<void> initializeSupabase() async {
   if (!Env.isConfigured) {
     if (kDebugMode) {
