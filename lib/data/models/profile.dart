@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../../core/utils/subscription_utils.dart';
 
 @immutable
 class Profile {
@@ -82,22 +83,23 @@ class Profile {
     );
   }
 
-  // Business logic getters (Section 7.4)
-  int get trialDaysLeft {
-    final daysElapsed = DateTime.now().difference(trialStartedAt).inDays;
-    final remaining = 30 - daysElapsed;
-    return remaining > 0 ? remaining : 0;
-  }
+  // Business logic getters (Section 7.4 via SubscriptionUtils)
+  int get trialDaysLeft => SubscriptionUtils.computeTrialDaysLeft(trialStartedAt);
 
-  bool get isPremium {
-    if (subscriptionStatus != 'active') return false;
-    if (subscriptionExpiresAt == null) return false;
-    return subscriptionExpiresAt!.isAfter(DateTime.now());
-  }
+  bool get isPremium => SubscriptionUtils.computeIsPremium(
+        subscriptionStatus: subscriptionStatus,
+        expiresAt: subscriptionExpiresAt,
+      );
 
-  bool get isTrial => !isPremium && trialDaysLeft > 0;
+  bool get isTrial => SubscriptionUtils.computeIsTrial(
+        isPremium: isPremium,
+        trialDaysLeft: trialDaysLeft,
+      );
 
-  bool get isLocked => !isPremium && !isTrial;
+  bool get isLocked => SubscriptionUtils.computeIsLocked(
+        isPremium: isPremium,
+        isTrial: isTrial,
+      );
 
   @override
   bool operator ==(Object other) =>
