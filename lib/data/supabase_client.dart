@@ -14,6 +14,7 @@ Future<void> initializeSupabase() async {
 
   await Supabase.initialize(
     url: Env.supabaseUrl,
+    // ignore: deprecated_member_use
     anonKey: Env.supabaseAnonKey,
   );
 }

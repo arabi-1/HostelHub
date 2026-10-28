@@ -47,12 +47,12 @@ class StatCard extends StatelessWidget {
                     Text(
                       title,
                       style: AppText.labelLarge.copyWith(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     if (icon != null)
-                      Icon(icon, color: Colors.white.withOpacity(0.8), size: 24),
+                      Icon(icon, color: Colors.white.withValues(alpha: 0.8), size: 24),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -77,7 +77,7 @@ class StatCard extends StatelessWidget {
                   Text(
                     subtitle!,
                     style: AppText.bodySmall.copyWith(
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                     ),
                   ),
                 ],
