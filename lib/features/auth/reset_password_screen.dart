@@ -8,6 +8,10 @@ import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_text_field.dart';
 import 'providers/auth_provider.dart';
 
+/// Password reset flow implementing 3-step OTP recovery (FR-03):
+/// 1. Request recovery token (resetPasswordForEmail)
+/// 2. Verify 6-digit OTP (verifyOTP with type: recovery)
+/// 3. Update password (updateUser)
 class ResetPasswordScreen extends ConsumerStatefulWidget {
   const ResetPasswordScreen({super.key});
 
