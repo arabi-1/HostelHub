@@ -36,6 +36,19 @@ class ResidentRepo {
     data.remove('id');
     data.remove('created_at');
 
+    // Ensure room_id is null if null or empty string
+    if (data['room_id'] == null || (data['room_id'] is String && (data['room_id'] as String).trim().isEmpty)) {
+      data['room_id'] = null;
+    }
+
+    // Ensure owner_id is set or omitted so Postgres uses default auth.uid()
+    final currentUserId = _effectiveClient.auth.currentUser?.id;
+    if (currentUserId != null && currentUserId.isNotEmpty) {
+      data['owner_id'] = currentUserId;
+    } else if (data['owner_id'] == null || (data['owner_id'] is String && (data['owner_id'] as String).trim().isEmpty)) {
+      data.remove('owner_id');
+    }
+
     final response = await _effectiveClient
         .from('residents')
         .insert(data)
@@ -49,6 +62,17 @@ class ResidentRepo {
     final data = resident.toJson();
     data.remove('id');
     data.remove('created_at');
+
+    if (data['room_id'] == null || (data['room_id'] is String && (data['room_id'] as String).trim().isEmpty)) {
+      data['room_id'] = null;
+    }
+
+    final currentUserId = _effectiveClient.auth.currentUser?.id;
+    if (currentUserId != null && currentUserId.isNotEmpty) {
+      data['owner_id'] = currentUserId;
+    } else if (data['owner_id'] == null || (data['owner_id'] is String && (data['owner_id'] as String).trim().isEmpty)) {
+      data.remove('owner_id');
+    }
 
     final response = await _effectiveClient
         .from('residents')

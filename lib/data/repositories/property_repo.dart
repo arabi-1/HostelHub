@@ -25,6 +25,13 @@ class PropertyRepo {
     data.remove('id'); // let Postgres generate UUID
     data.remove('created_at');
 
+    final currentUserId = _effectiveClient.auth.currentUser?.id;
+    if (currentUserId != null && currentUserId.isNotEmpty) {
+      data['owner_id'] = currentUserId;
+    } else if (data['owner_id'] == null || (data['owner_id'] is String && (data['owner_id'] as String).trim().isEmpty)) {
+      data.remove('owner_id');
+    }
+
     final response = await _effectiveClient
         .from('properties')
         .insert(data)
@@ -38,6 +45,13 @@ class PropertyRepo {
     final data = property.toJson();
     data.remove('id');
     data.remove('created_at');
+
+    final currentUserId = _effectiveClient.auth.currentUser?.id;
+    if (currentUserId != null && currentUserId.isNotEmpty) {
+      data['owner_id'] = currentUserId;
+    } else if (data['owner_id'] == null || (data['owner_id'] is String && (data['owner_id'] as String).trim().isEmpty)) {
+      data.remove('owner_id');
+    }
 
     final response = await _effectiveClient
         .from('properties')

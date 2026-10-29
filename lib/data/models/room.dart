@@ -28,8 +28,8 @@ class Room {
 
   factory Room.fromJson(Map<String, dynamic> json) {
     return Room(
-      id: json['id'] as String,
-      ownerId: json['owner_id'] as String,
+      id: json['id'] as String? ?? '',
+      ownerId: json['owner_id'] as String? ?? '',
       propertyId: json['property_id'] as String,
       roomNumber: json['room_number'] as String,
       floor: json['floor'] as String?,
@@ -45,8 +45,8 @@ class Room {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'owner_id': ownerId,
+      if (id.isNotEmpty) 'id': id,
+      if (ownerId.isNotEmpty) 'owner_id': ownerId,
       'property_id': propertyId,
       'room_number': roomNumber,
       'floor': floor,

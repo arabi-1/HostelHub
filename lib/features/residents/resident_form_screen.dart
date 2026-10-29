@@ -66,7 +66,7 @@ class _ResidentFormScreenState extends ConsumerState<ResidentFormScreen> {
     );
     _notesController = TextEditingController(text: r?.notes ?? '');
 
-    _selectedRoomId = r?.roomId;
+    _selectedRoomId = (r?.roomId != null && r!.roomId!.trim().isNotEmpty) ? r.roomId : null;
     if (r != null) {
       _joinDate = r.joinDate;
     }
@@ -116,9 +116,10 @@ class _ResidentFormScreenState extends ConsumerState<ResidentFormScreen> {
     setState(() => _isLoading = true);
     try {
       final notifier = ref.read(residentsProvider.notifier);
+      final cleanRoomId = (_selectedRoomId != null && _selectedRoomId!.trim().isNotEmpty) ? _selectedRoomId!.trim() : null;
       if (widget.resident == null) {
         await notifier.addResident(
-          roomId: _selectedRoomId,
+          roomId: cleanRoomId,
           fullName: _nameController.text.trim(),
           phone: normalizedPhone,
           cnic: normalizedCnic,
@@ -132,7 +133,7 @@ class _ResidentFormScreenState extends ConsumerState<ResidentFormScreen> {
         );
       } else {
         final updated = widget.resident!.copyWith(
-          roomId: _selectedRoomId,
+          roomId: cleanRoomId,
           fullName: _nameController.text.trim(),
           phone: normalizedPhone,
           cnic: normalizedCnic,
@@ -252,7 +253,9 @@ class _ResidentFormScreenState extends ConsumerState<ResidentFormScreen> {
 
                 // Room Picker Dropdown
                 DropdownButtonFormField<String?>(
-                  initialValue: _selectedRoomId,
+                  initialValue: (_selectedRoomId != null && _selectedRoomId!.trim().isNotEmpty)
+                      ? _selectedRoomId
+                      : null,
                   decoration: const InputDecoration(
                     labelText: 'Assign Room (Available Beds)',
                     prefixIcon: Icon(Icons.hotel_outlined),
@@ -274,9 +277,9 @@ class _ResidentFormScreenState extends ConsumerState<ResidentFormScreen> {
                   ],
                   onChanged: (val) {
                     setState(() {
-                      _selectedRoomId = val;
-                      if (val != null && _rentController.text.isEmpty) {
-                        final room = availableRooms.firstWhere((r) => r.id == val);
+                      _selectedRoomId = (val != null && val.trim().isNotEmpty) ? val.trim() : null;
+                      if (_selectedRoomId != null && _rentController.text.isEmpty) {
+                        final room = availableRooms.firstWhere((r) => r.id == _selectedRoomId);
                         _rentController.text = room.defaultRent.toInt().toString();
                       }
                     });

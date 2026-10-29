@@ -67,9 +67,9 @@ class Resident {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'owner_id': ownerId,
-      'room_id': roomId,
+      if (id.isNotEmpty) 'id': id,
+      if (ownerId.isNotEmpty) 'owner_id': ownerId,
+      'room_id': (roomId == null || roomId!.isEmpty) ? null : roomId,
       'full_name': fullName,
       'phone': phone,
       'cnic': cnic,

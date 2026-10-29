@@ -53,10 +53,11 @@ class ResidentsNotifier extends AsyncNotifier<List<Resident>> {
     String? notes,
   }) async {
     final repo = ref.read(residentRepoProvider);
+    final currentUserId = Supabase.instance.client.auth.currentUser?.id ?? '';
     final newResident = Resident(
       id: '',
-      ownerId: '',
-      roomId: roomId,
+      ownerId: currentUserId,
+      roomId: (roomId != null && roomId.trim().isNotEmpty) ? roomId.trim() : null,
       fullName: fullName.trim(),
       phone: phone.trim(),
       cnic: cnic?.trim().isEmpty == true ? null : cnic?.trim(),

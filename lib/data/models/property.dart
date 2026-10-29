@@ -22,8 +22,8 @@ class Property {
 
   factory Property.fromJson(Map<String, dynamic> json) {
     return Property(
-      id: json['id'] as String,
-      ownerId: json['owner_id'] as String,
+      id: json['id'] as String? ?? '',
+      ownerId: json['owner_id'] as String? ?? '',
       name: json['name'] as String,
       address: json['address'] as String?,
       city: json['city'] as String?,
@@ -36,8 +36,8 @@ class Property {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'owner_id': ownerId,
+      if (id.isNotEmpty) 'id': id,
+      if (ownerId.isNotEmpty) 'owner_id': ownerId,
       'name': name,
       'address': address,
       'city': city,
