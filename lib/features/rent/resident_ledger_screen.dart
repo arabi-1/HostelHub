@@ -219,7 +219,7 @@ class ResidentLedgerScreen extends ConsumerWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _buildStat('Total Billed', 'Rs ${currencyFormatter.format(data.totalBilled.toInt())}', AppColors.ink),
+                        _buildStat('Total Billed', 'Rs ${currencyFormatter.format(data.totalBilled.toInt())}', Theme.of(context).colorScheme.onSurface),
                         _buildStat('Total Paid', 'Rs ${currencyFormatter.format(data.totalPaid.toInt())}', AppColors.success),
                         _buildStat(
                           'Balance Due',
@@ -324,7 +324,7 @@ class ResidentLedgerScreen extends ConsumerWidget {
                                       '${isPayment ? '-' : '+'} Rs ${currencyFormatter.format(entry.amount.toInt())}',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        color: isPayment ? AppColors.success : AppColors.ink,
+                                        color: isPayment ? AppColors.success : Theme.of(context).colorScheme.onSurface,
                                         fontSize: 15,
                                       ),
                                     ),

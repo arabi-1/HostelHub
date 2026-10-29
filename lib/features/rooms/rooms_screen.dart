@@ -247,7 +247,7 @@ class RoomsScreen extends ConsumerWidget {
                                         'Rs ${currencyFormatter.format(room.defaultRent.toInt())} / bed',
                                         style: AppText.labelLarge.copyWith(
                                           fontWeight: FontWeight.w700,
-                                          color: AppColors.ink,
+                                          color: Theme.of(context).colorScheme.onSurface,
                                         ),
                                       ),
                                     ],

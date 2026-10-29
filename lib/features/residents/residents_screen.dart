@@ -219,7 +219,7 @@ class ResidentsScreen extends ConsumerWidget {
                                           'Rs ${currencyFormatter.format(resident.monthlyRent.toInt())} / mo',
                                           style: AppText.labelLarge.copyWith(
                                             fontWeight: FontWeight.w600,
-                                            color: AppColors.ink,
+                                            color: Theme.of(context).colorScheme.onSurface,
                                           ),
                                         ),
                                       ],

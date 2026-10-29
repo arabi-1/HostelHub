@@ -89,7 +89,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 36),
                   Text(
                     AppStrings.signIn,
-                    style: AppText.headlineLarge.copyWith(color: AppColors.ink),
+                    style: AppText.headlineLarge.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                   const SizedBox(height: 20),
                   AppTextField(

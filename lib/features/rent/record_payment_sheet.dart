@@ -306,9 +306,13 @@ class _RecordPaymentSheetState extends ConsumerState<RecordPaymentSheet> {
             const SizedBox(height: 16),
 
             // Payment Method Selector
-            const Text(
+            Text(
               'Payment Method',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.ink),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: 8),
             Wrap(

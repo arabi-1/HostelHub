@@ -118,7 +118,7 @@ class StatCard extends StatelessWidget {
               Text(
                 value,
                 style: AppText.titleLarge.copyWith(
-                  color: AppColors.ink,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.w700,
                 ),
               ),

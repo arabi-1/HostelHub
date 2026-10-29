@@ -441,7 +441,7 @@ class RentScreen extends ConsumerWidget {
               '$label: $count',
               style: TextStyle(
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                color: AppColors.ink,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 13,
               ),
             ),

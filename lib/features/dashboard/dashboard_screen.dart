@@ -441,17 +441,23 @@ class _StatTile extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            Text(
-              value,
-              style: AppText.titleLarge.copyWith(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                color: highlightColor,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                value,
+                style: AppText.titleLarge.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: highlightColor,
+                ),
               ),
             ),
             const SizedBox(height: 2),
             Text(
               title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: AppText.bodySmall.copyWith(color: AppColors.muted),
             ),
           ],

@@ -56,7 +56,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        foregroundColor: AppColors.ink,
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
         elevation: 0,
       ),
       body: SafeArea(

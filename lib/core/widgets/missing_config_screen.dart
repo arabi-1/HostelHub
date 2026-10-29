@@ -34,7 +34,9 @@ class MissingConfigScreen extends StatelessWidget {
               const SizedBox(height: 24),
               Text(
                 AppStrings.configMissingTitle,
-                style: AppText.headlineLarge.copyWith(color: AppColors.ink),
+                style: AppText.headlineLarge.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
@@ -47,7 +49,7 @@ class MissingConfigScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: AppColors.outline),
                 ),

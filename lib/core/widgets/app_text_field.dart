@@ -80,7 +80,7 @@ class _AppTextFieldState extends State<AppTextField> {
           Text(
             widget.label!,
             style: AppText.labelMedium.copyWith(
-              color: AppColors.ink,
+              color: Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -99,7 +99,9 @@ class _AppTextFieldState extends State<AppTextField> {
           focusNode: widget.focusNode,
           textInputAction: widget.textInputAction,
           onFieldSubmitted: widget.onFieldSubmitted,
-          style: AppText.bodyMedium.copyWith(color: AppColors.ink),
+          style: AppText.bodyMedium.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           decoration: InputDecoration(
             hintText: widget.hint,
             prefixIcon: widget.prefixIcon,

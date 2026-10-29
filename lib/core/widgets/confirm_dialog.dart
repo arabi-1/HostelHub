@@ -85,7 +85,7 @@ class _ConfirmDialogState extends State<ConfirmDialog> {
       title: Text(
         widget.title,
         style: AppText.titleLarge.copyWith(
-          color: widget.isDestructive ? AppColors.danger : AppColors.ink,
+          color: widget.isDestructive ? AppColors.danger : Theme.of(context).colorScheme.onSurface,
         ),
       ),
       content: Column(

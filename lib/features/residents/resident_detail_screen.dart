@@ -395,7 +395,7 @@ class _ResidentDetailScreenState extends ConsumerState<ResidentDetailScreen> {
                           fontSize: 16,
                           fontFamily: 'monospace',
                           letterSpacing: 1.2,
-                          color: _isCnicRevealed ? AppColors.primary : AppColors.ink,
+                          color: _isCnicRevealed ? AppColors.primary : Theme.of(context).colorScheme.onSurface,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
