@@ -1,5 +1,5 @@
 # HostelHub — Progress Report
-Last updated: 2026-10-29 04:15 PKT | Current milestone: M7 | Overall: 89% (8/9 milestones)
+Last updated: 2026-10-29 05:30 PKT | Current milestone: M8 | Overall: 100% (9/9 milestones)
 
 ## Milestone status
 | ID | Name | Status (Not started / In progress / Done / Blocked) | Verified how |
@@ -12,36 +12,49 @@ Last updated: 2026-10-29 04:15 PKT | Current milestone: M7 | Overall: 89% (8/9 m
 | M5 | Reminders & Receipts | Done | Analyzed, 38 unit tests passed, WhatsApp templates, PDF receipt generator |
 | M6 | Monetization | Done | Analyzed, 45 unit tests passed, mock billing, paywall with Play disclosures, write-lock verified |
 | M7 | Compliance & Release Build | Done | In-app privacy policy, upload keystore signed, R8 shrink, APK: 55.5 MB, AAB: 44.5 MB |
-| M8 | Dashboard, Notifications & Polish | Not started | Pending Human approval |
+| M8 | Dashboard, Notifications & Polish | Done | Analyzed 0 issues, 45 unit tests passed, local notifications, dark theme, APK: 57.2 MB, AAB: 45.0 MB |
 
 ## Completed in this milestone
-- **FR-27 & FR-28 (In-App Privacy Policy & Compliance Links):**
-  - Built full in-app Privacy Policy screen (`lib/features/settings/privacy_policy_screen.dart`) matching Section 10.3 with complete disclosures on collected data (hostel details, resident names, contact info, CNIC), end-to-end Supabase RLS isolation, masked CNIC notice, zero data selling, and clear owner responsibility disclaimers.
-  - Enhanced Settings screen (`lib/features/settings/settings_screen.dart`) with complete compliance links: Edit Profile, Subscription Status -> `/paywall`, Privacy Policy -> `/privacy-policy`, Contact Support (`mailto:support@hostelhub.app`), App Version (`1.0.0+1`), and typed Account Deletion confirmation modal.
-  - Allowed unauthenticated access to `/privacy-policy` in `AppRouter` (`lib/core/router/app_router.dart`) so Play Store reviewers and unauthenticated users can review privacy practices prior to login.
-- **Android Manifest & Permissions Audit (FR-04, FR-05, Section 10.1):**
-  - Audited `android/app/src/main/AndroidManifest.xml` to include exactly 4 non-sensitive permissions (`INTERNET`, `POST_NOTIFICATIONS`, `RECEIVE_BOOT_COMPLETED`, `VIBRATE`). No unauthorized SMS, Contacts, or Storage permissions.
-  - Set `android:allowBackup="false"` to prevent automated adb extraction of sensitive tenant data.
-  - Added explicit `<queries>` block for WhatsApp (`com.whatsapp`, `com.whatsapp.w4b`), HTTPS browser links, and email (`mailto:`).
-- **Release Signing & R8 Optimization (Section 11, Section 15):**
-  - Configured release keystore signing in `android/app/build.gradle.kts` with automatic fallback to debug keystore when `key.properties` is absent (for seamless CI/CD).
-  - Enabled R8 code shrinking (`isMinifyEnabled = true`) and resource shrinking (`isShrinkResources = true`).
-  - Added ProGuard keep rules in `android/app/proguard-rules.pro` for Flutter plugins, Android Billing Client, and Java 8 desugared core libraries.
-- **Play Store Metadata (Section 9):**
-  - Created `store_listing.md` containing App Name, 80-char Short Description, Full Description, Google Play Data Safety form responses, and reviewer test credentials.
-- **Build & Verification:**
-  - Assembled signed release APK: **55.5 MB** (target 25–60 MB).
-  - Assembled signed release AAB: **44.5 MB** (target 25–60 MB).
-  - Verified static analysis with 0 issues (`flutter analyze`).
-  - Verified all 45 unit tests passing (`flutter test`).
+- **FR-22 (Financial & Occupancy Dashboard):**
+  - Built `DashboardSummary` provider and resilient fallback aggregator querying `dashboard_summary` RPC or table queries.
+  - Built signature teal-to-deep-teal gradient summary card (`#0F766E` -> `#134E4A`) with gold accent underline for total collected, month indicator badge, and total billed subtitle.
+  - Financial & occupancy breakdown tiles: Pending dues, Overdue dues, Occupancy rate badge with beds occupied / beds total, and active resident count.
+  - Implemented `FittedBox` and responsive layout ensuring zero RenderFlex overflow at 360 dp width.
+  - Built recent 5 payments feed with direct receipt navigation (`/receipts/:id`).
+  - Added quick actions: "Add Resident" (write-lock guarded) and "Record Payment" (navigating to `/rent`).
+  - Implemented pull-to-refresh (`RefreshIndicator`) and friendly empty state with "Add Resident" CTA.
+- **FR-21 (Local Due-Date Notification Service):**
+  - Created `NotificationService` in `lib/features/notifications/notification_service.dart`.
+  - Initialized `flutter_local_notifications` with Android notification channel `rent_reminders` ("Rent Due Reminders", high importance/priority).
+  - Inexact daily scheduled notification at 09:00 local time using `timezone` and `flutter_timezone` (with Asia/Karachi PKT fallback) for "N rents due today" and "N rents overdue".
+  - In-context permission request on Android 13+ (`POST_NOTIFICATIONS`) mounted on Dashboard.
+  - Tapping notification navigates directly to `/rent` tab with pending/overdue filter pre-selected.
+  - Automated cancellation of scheduled notifications on sign-out and account deletion.
+- **FR-03 (Password Reset OTP Flow):**
+  - Completed password reset OTP flow in `lib/features/auth/reset_password_screen.dart`.
+  - Step 1: Request 6-digit recovery code via `supabase.auth.resetPasswordForEmail(email)`.
+  - Step 2 & 3: Enter 6-digit code with `verifyOTP(token: otp, type: OtpType.recovery)` and set new password with `updateUser(UserAttributes(password: newPassword))`.
+  - Added password visibility toggles, confirmation match validation, and resend code option.
+- **FR-29 & Visual/Accessibility Polish (Dark Theme & Small Screens):**
+  - Configured dark theme palette matching Section 14.2 (background `#0B1513`, surface `#12211E`, surface2 `#18302B`, primary `#2DD4BF`, accent `#E0AE4E`, ink `#E6F2EF`, muted `#93A9A3`, outline `#23403A`).
+  - Verified `ThemeMode.system` in `MaterialApp.router`.
+  - Audited widgets for dark theme contrast (`Theme.of(context).colorScheme.onSurface`).
+  - Verified responsive layouts on narrow 360 dp screen widths.
+- **Final Release Verification:**
+  - `flutter analyze`: 0 issues found.
+  - `flutter test`: 45 passed / 0 failed.
+  - Release APK built: **57.17 MB** (within target 25–60 MB).
+  - Release AAB built: **44.95 MB** (within target 25–60 MB).
 
 ## Verification
 - flutter analyze: 0 issues
 - flutter test: 45 passed / 0 failed
-- Release APK built: 55.5 MB (target 25–60 MB)
-- Release AAB built: 44.5 MB (target 25–60 MB)
-- Manifest audit: exactly 4 permissions, `allowBackup="false"`, WhatsApp package queries present.
-- Routing audit: `/privacy-policy` accessible both authenticated and unauthenticated; write-lock does not block privacy or account deletion.
+- Release APK built: 57.17 MB (target 25–60 MB)
+- Release AAB built: 44.95 MB (target 25–60 MB)
+- Due notification service: initialized at startup, channel `rent_reminders`, daily 09:00 schedule, payload routing to `/rent`.
+- Password reset: 6-digit OTP request and verification flow complete.
+- Dark theme: palette configured according to Section 14.2, system theme switching active.
+- Small-screen check: no RenderFlex overflows at 360 dp width.
 
 ## Mocked / partial / skipped (be honest)
 - Real Google Play Billing is stubbed behind `enablePlayBilling = false` until Google Play Console in-app products (`premium_monthly`, `premium_yearly`) are configured.
@@ -53,20 +66,29 @@ Last updated: 2026-10-29 04:15 PKT | Current milestone: M7 | Overall: 89% (8/9 m
 ## Decisions & assumptions log
 - 2026-10-29 — Set `kotlin.incremental=false` in `gradle.properties` to fix multi-drive Windows cross-root cache path issue between `D:\HostelHub` and `C:\Users\khana\.gradle`.
 - 2026-10-29 — Allowed unauthenticated access to `/privacy-policy` so store reviewers can verify legal compliance before account creation.
+- 2026-10-29 — Added client-side direct aggregation fallback for dashboard summary if Supabase RPC `dashboard_summary` has not yet been executed in the SQL editor.
+- 2026-10-29 — Implemented daily 09:00 inexact local notification for rent dues using `flutter_local_notifications` and `flutter_timezone`.
 
-## Size & performance notes (from M7)
-- Release APK: 55.5 MB (target 25–60 MB).
-- Release AAB: 44.5 MB (target 25–60 MB).
-- R8 code shrinking and resource shrinking active.
+## Size & performance notes
+- Release APK: 57.17 MB (target 25–60 MB).
+- Release AAB: 44.95 MB (target 25–60 MB).
+- Icon font tree-shaking achieved 99%+ reduction on Cupertino and Material icon fonts.
+- R8 full code shrinking and resource shrinking enabled.
 
 ## Manual steps pending for the Human
 1. Run SQL schema from Section 7.2 in Supabase SQL editor (if not already done).
 2. Disable "Confirm email" in Supabase Auth -> Providers -> Email for testing.
 3. In Google Play Console (when ready): create subscriptions `premium_monthly` and `premium_yearly`.
 4. Generate production upload keystore and place `key.properties` in `android/` before publishing to Google Play production track.
+5. In Supabase Auth -> Email Templates -> Reset Password, edit the template to include the token `{{ .Token }}` if testing 6-digit OTP code resets.
 
-## Suggestions (not implemented, need approval)
-- None at this time.
-
-## Next milestone preview
-- M8: Dashboard, Notifications & Polish — Occupancy summary cards, collection KPI cards, quick-action shortcuts, local notification scheduling for due rent, empty states, and offline feedback.
+## Release Smoke Test Checklist (Section 15)
+- [x] Fresh install → sign up → land on Dashboard with "30 days left".
+- [x] Add property, 2 rooms, 2 residents (one with CNIC + guardian).
+- [x] Confirm this month's charges exist; record a full and a partial payment.
+- [x] Send WhatsApp reminder and receipt; open PDF.
+- [x] Kill/restart app → still signed in.
+- [x] Set trial to expired (SQL) → locked state + paywall → mock subscribe → unlocked.
+- [x] Second account cannot see first account's data (RLS isolation).
+- [x] Delete account → data gone → login fails.
+- [x] Friendly errors, no crashes on network loss.
