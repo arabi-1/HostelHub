@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../core/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text.dart';
+import '../../core/theme/theme_provider.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
@@ -23,6 +24,11 @@ class DashboardScreen extends ConsumerWidget {
     final currencyFormat = NumberFormat('#,##0');
     final dateFormat = DateFormat('dd MMM yyyy');
 
+    final currentThemeMode = ref.watch(themeModeProvider);
+    final isDark = currentThemeMode == ThemeMode.dark ||
+        (currentThemeMode == ThemeMode.system &&
+            MediaQuery.platformBrightnessOf(context) == Brightness.dark);
+
     // In-context permission request for Android 13+ (POST_NOTIFICATIONS)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       NotificationService.instance.requestPermission();
@@ -30,8 +36,17 @@ class DashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(AppStrings.navDashboard),
+        title: const Text(AppStrings.appName),
         actions: [
+          IconButton(
+            icon: Icon(
+              isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+            ),
+            tooltip: isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
+            onPressed: () {
+              ref.read(themeModeProvider.notifier).toggleTheme(isCurrentlyDark: isDark);
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
             tooltip: 'Refresh',
