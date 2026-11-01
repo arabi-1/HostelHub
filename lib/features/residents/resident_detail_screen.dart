@@ -259,7 +259,7 @@ class _ResidentDetailScreenState extends ConsumerState<ResidentDetailScreen> {
               // Unpaid Dues & WhatsApp Reminder (FR-17, FR-18)
               if (resident.isActive && (ledgerAsync.value?.totalBalance ?? 0) > 0) ...[
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
                     color: AppColors.dangerContainer,
                     borderRadius: BorderRadius.circular(12),
@@ -268,26 +268,38 @@ class _ResidentDetailScreenState extends ConsumerState<ResidentDetailScreen> {
                   child: Row(
                     children: [
                       const Icon(Icons.warning_amber_rounded, color: AppColors.danger),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'Unpaid Dues: Rs ${currencyFormatter.format((ledgerAsync.value?.totalBalance ?? 0).toInt())}',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.danger,
                               ),
                             ),
+                            const SizedBox(height: 2),
                             const Text(
                               'Rent reminder ready to send',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                               style: TextStyle(fontSize: 12, color: AppColors.muted),
                             ),
                           ],
                         ),
                       ),
+                      const SizedBox(width: 8),
                       FilledButton.tonalIcon(
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                          visualDensity: VisualDensity.compact,
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
                         icon: const Icon(Icons.chat, size: 16),
                         label: const Text('Send Reminder'),
                         onPressed: () => _sendRentReminder(
